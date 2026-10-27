@@ -1,0 +1,421 @@
+Project "Freelance Marketplace Ecosystem" {
+  database_type: 'MySQL'
+  note: '''
+    Freelance Marketplace Ecosystem (Mini-Upwork)
+  '''
+}
+
+
+Table user_account {
+  id bigint [pk, increment, not null, note: 'Unique identifier for each system account']
+  email varchar(255) [not null, note: 'Email address used for login and notifications']
+  password_hash varchar(255) [not null, note: 'Hashed password string']
+  first_name varchar(100) [not null, note: 'First name of the user']
+  last_name varchar(100) [not null, note: 'Last name (and middle name) of the user']
+
+  indexes {
+    email [unique]
+  }
+
+  Records {
+    1, 'ok@gmail.com', 'pass', 'john', 'doe'
+    2, 'wtv@gmail.com', 'pass1', 'joe', 'airliner'
+    3, 'lmao@gmail.com', 'passpass', 'mary', 'johnson'
+    4, 'anna.lee@acme.com', 'hash_anna', 'anna', 'lee'
+    5, 'david.kim@brightstudio.com', 'hash_david', 'david', 'kim'
+  }
+
+  Note: 'Stores user account information.'
+
+    
+}
+
+Table freelancer {
+  id bigint [pk, not null, note: 'Freelancer profile identifier']
+  registration_date date [note: 'Date the user registered as a freelancer']
+  user_account_id bigint [unique, note: '1-1 link to the corresponding user account']
+  location varchar(255) [note: 'Address, city or country of the freelancer']
+  overview text [note: 'Self-introduction and summary of work experience']
+
+  Records {
+    1, '2026-01-10', 1, 'Hanoi, Vietnam', 'Backend developer with 5 years of experience in Python and MySQL.'
+    2, '2026-02-03', 2, 'Ho Chi Minh City, Vietnam', 'Full-stack developer focused on React and Node.js.'
+    3, '2026-02-20', 3, 'Da Nang, Vietnam', 'UI/UX designer specializing in mobile apps and design systems.'
+  }
+
+  Note: 'Stores freelancer profiles.'
+}
+
+Table test {
+  id bigint [pk, not null, note: 'Skill assessment test identifier']
+  test_name varchar(255) [not null, unique, note: 'Name of the skill assessment test']
+  test_link varchar(500) [note: 'Link to the online test']
+
+  Records {
+    1, 'Python Skills Assessment', 'https://tests.example.com/python'
+    2, 'SQL Fundamentals', 'https://tests.example.com/sql'
+    3, 'React Basics', 'https://tests.example.com/react'
+  }
+
+  Note: 'Stores skill test information.'
+}
+
+Table test_result {
+  id bigint [pk, not null, note: 'Test attempt/result identifier']
+  freelancer_id bigint [not null, note: 'Freelancer who took the test']
+  test_id bigint [not null, note: 'Test that was taken']
+  start_time date [not null, note: 'Date the test was started']
+  end_time date [note: 'Date the test was completed']
+  test_result_link text [note: 'Link to the certificate or detailed test result']
+  score decimal(5,2) [note: 'Score achieved on the test']
+  display_on_profile boolean [not null, default: false, note: 'Flag to show/hide this result on the profile page']
+
+  Records {
+    1, 1, 1, '2026-01-12', '2026-01-12', 'https://tests.example.com/results/101', 92.50, true
+    2, 1, 2, '2026-01-15', '2026-01-15', 'https://tests.example.com/results/102', 88.00, true
+    3, 2, 3, '2026-02-05', '2026-02-05', 'https://tests.example.com/results/103', 95.25, true
+    4, 3, 3, '2026-02-22', null, null, null, false
+  }
+
+  Note: 'Stores freelancer test results.'
+}
+
+Table certification {
+  id bigint [pk, not null, note: 'Unique certification identifier']
+  certification_name varchar(255) [not null, note: 'Name of the certification (e.g. AWS Solutions Architect)']
+  freelancer_id bigint [unique, note: 'Freelancer who owns it']
+  provider varchar(255) [note: 'Organization that issued the certification (e.g. Google, Amazon)']
+  description text [note: 'Detailed description of the certification content and scope']
+  date_earned date [note: 'Date the freelancer received the certification']
+  certification_link text [note: 'URL for verifying the certification online']
+
+  Records {
+    1, 'AWS Solutions Architect Associate', 1, 'Amazon', 'Covers designing distributed systems on AWS.', '2025-11-20', 'https://verify.example.com/aws/001'
+    2, 'Meta Front-End Developer', 2, 'Meta', 'Covers modern front-end development with React.', '2025-09-15', 'https://verify.example.com/meta/002'
+    3, 'Google UX Design Certificate', 3, 'Google', 'Covers the UX design process from research to prototyping.', '2025-12-01', 'https://verify.example.com/google/003'
+  }
+
+  Note: 'Stores freelancer certification information.'
+}
+
+Table skill {
+  id bigint [pk, not null, note: 'Skill identifier']
+  skill_name varchar(255) [note: 'Name of the professional skill (e.g. React, MySQL, Python)']
+
+  Records {
+    1, 'Python'
+    2, 'MySQL'
+    3, 'React'
+    4, 'Node.js'
+    5, 'UI Design'
+  }
+
+  Note: 'Stores the list of skills.'
+}
+
+Table has_skill {
+  freelancer_id bigint [not null, note: 'ID of the freelancer who has the skill']
+  skill_id bigint [not null, note: 'ID of the linked skill']
+
+  indexes {
+    (freelancer_id, skill_id) [pk]
+  }
+
+  Records {
+    1, 1
+    1, 2
+    1, 4
+    2, 3
+    2, 4
+    3, 3
+    3, 5
+  }
+
+  Note: 'Links freelancers to their skills.'
+}
+
+Table company {
+  id bigint [pk, not null, note: 'Identifier of the hiring company/organization']
+  company_location varchar(255) [note: 'Headquarters or address of the company']
+  company_name varchar(255) [note: 'Legal or brand name of the company']
+
+  Records {
+    1, 'Hanoi, Vietnam', 'Acme Software'
+    2, 'Ho Chi Minh City, Vietnam', 'Bright Studio'
+  }
+
+  Note: 'Stores company information.'
+}
+
+Table hire_manager {
+  id bigint [pk, not null, note: 'Hiring manager (client) identifier']
+  user_account_id bigint [not null, note: 'Corresponding user account']
+  registration_date date [note: 'Date the hiring manager account was registered']
+  location varchar(255) [note: 'Work location of the hiring manager']
+  company_id bigint [not null, note: 'Company this hiring manager represents']
+
+  Records {
+    1, 4, '2026-01-05', 'Hanoi, Vietnam', 1
+    2, 5, '2026-01-18', 'Ho Chi Minh City, Vietnam', 2
+  }
+
+  Note: 'Stores hiring manager profiles.'
+}
+
+
+Table payment_type {
+  id bigint [pk, not null, note: 'Payment type identifier']
+  type_name varchar(100) [note: 'Name of the payment method (e.g. Fixed price, Hourly)']
+
+  Records {
+    1, 'Fixed price'
+    2, 'Hourly'
+  }
+
+  Note: 'Stores payment types.'
+}
+
+Table proposal_status_catalog {
+  id bigint [pk, not null, note: 'Status catalog identifier']
+  status_name varchar(255) [note: 'Status name (e.g. Pending, Accepted, Rejected)']
+
+  Records {
+    1, 'Pending'
+    2, 'Accepted'
+    3, 'Rejected'
+    4, 'Active'
+    5, 'Completed'
+  }
+
+  Note: 'Stores the catalog of proposal and contract statuses.'
+}
+
+Table expected_duration {
+  id bigint [pk, not null, note: 'Project duration catalog identifier']
+  duration_text text [note: 'Time span for the work (e.g. Less than 1 month, 1-3 months)']
+
+  Records {
+    1, 'Less than 1 month'
+    2, '1-3 months'
+    3, '3-6 months'
+  }
+
+  Note: 'Stores project duration ranges.'
+}
+
+Table complexity {
+  id bigint [pk, not null, note: 'Project complexity catalog identifier']
+  complexity_type text [note: 'Complexity level (e.g. Entry, Intermediate, Expert)']
+
+  Records {
+    1, 'Entry'
+    2, 'Intermediate'
+    3, 'Expert'
+  }
+
+  Note: 'Stores project complexity levels.'
+}
+
+Table job {
+  id bigint [pk, not null, note: 'Unique job identifier']
+  hire_manager_id bigint [not null, note: 'Hiring manager who posted this job']
+  duration_id bigint [not null, note: 'Expected time to complete the job']
+  complexity_id bigint [not null, note: 'Difficulty level of the project']
+  description text [note: 'Detailed description of requirements and job scope']
+  main_skill_id bigint [not null, note: 'Main/most important skill required']
+  payment_type_id bigint [not null, note: 'Payment method for the budget (hourly or fixed)']
+  payment_amount decimal(8,2) [note: 'Budget amount offered for the job']
+  title varchar(255) [not null, note: 'Title of this job']
+
+  Records {
+    1, 1, 2, 2, 'Build an analytics dashboard with charts and filters.', 3, 1, 1500.00, 'React Analytics Dashboard'
+    2, 1, 1, 1, 'Review and optimize slow queries in an existing MySQL database.', 2, 2, 25.00, 'MySQL Query Optimization'
+    3, 2, 3, 3, 'Redesign the UI of a food delivery mobile app.', 5, 1, 3000.00, 'Mobile App UI Redesign'
+  }
+
+  Note: 'Stores job postings.'
+}
+
+Table job_require_skill {
+  job_id bigint [not null, note: 'ID of the job that requires the skill']
+  skill_id bigint [not null, note: 'ID of the additional required skill']
+
+  indexes {
+    (job_id, skill_id) [pk]
+  }
+
+  Records {
+    1, 3
+    1, 4
+    2, 1
+    2, 2
+    3, 3
+    3, 5
+  }
+
+  Note: 'Links jobs to their required skills.'
+}
+
+Table proposal {
+  id bigint [pk, not null, note: 'Proposal/bid identifier']
+  job_id bigint [not null, note: 'Job the freelancer is applying to']
+  freelancer_id bigint [not null, note: 'Freelancer who submitted the proposal']
+  proposal_time timestamp [note: 'Time the proposal was submitted']
+  payment_type_id bigint [not null, note: 'Proposed payment method']
+  payment_amount decimal(8,2) [not null, note: 'Amount quoted by the freelancer']
+  current_proposal_status_id bigint [not null, note: 'Current status of the application']
+  client_grade decimal(2,1) [note: 'Rating the client gave to the freelancer']
+  client_comment text [note: 'Feedback comment from the client']
+  freelancer_comment text [note: 'Feedback comment from the freelancer']
+  freelancer_grade decimal(2,1) [note: 'Rating the freelancer gave to the client']
+
+  Records {
+    1, 1, 2, '2026-02-10 09:30:00', 1, 1400.00, 5, 4.5, 'Great work and delivered on time.', 'Clear requirements, pleasant to work with.', 4.0
+    2, 2, 1, '2026-02-12 14:00:00', 2, 22.00, 4, null, null, null, null
+    3, 3, 3, '2026-03-01 10:15:00', 1, 2800.00, 1, null, null, null, null
+    4, 1, 1, '2026-02-11 16:45:00', 1, 1600.00, 3, null, null, null, null
+  }
+
+  Note:  'Stores freelancer job proposals.'
+}
+
+Table contract {
+  id bigint [pk, not null, note: 'Unique contract identifier']
+  proposal_id bigint [not null, unique, note: 'Accepted proposal that created this contract']
+  company_id bigint [not null, note: 'Company that signed the outsourcing contract']
+  freelancer_id bigint [not null, note: 'Freelancer who directly performs the contract']
+  start_time timestamp [not null, note: 'Time the contract officially starts']
+  end_time timestamp [note: 'Time the contract ends or is accepted/completed']
+  payment_type_id bigint [not null, note: 'Payment method applied']
+  payment_amount decimal(8,2) [not null, note: 'Contract value or the agreed actual rate']
+  current_contract_status_id bigint [not null, note: 'Current status of the contract']
+
+  Records {
+    1, 1, 1, 2, '2026-02-15 08:00:00', '2026-03-20 17:00:00', 1, 1400.00, 5
+    2, 2, 1, 1, '2026-02-16 08:00:00', null, 2, 22.00, 4
+  }
+
+  Note: 'Stores contracts between companies and freelancers.'
+}
+
+Table work_session {
+  id bigint [pk, not null, note: 'Work session identifier (for time tracking)']
+  contract_id bigint [not null, note: 'Contract this work session belongs to']
+  start_time timestamp [note: 'Time the work session started']
+  end_time timestamp [note: 'Time the work session ended']
+
+  Records {
+    1, 2, '2026-02-17 09:00:00', '2026-02-17 12:00:00'
+    2, 2, '2026-02-18 09:00:00', '2026-02-18 13:30:00'
+    3, 2, '2026-02-19 14:00:00', '2026-02-19 18:00:00'
+  }
+
+  Note: 'Stores work sessions belonging to contracts.'
+}
+
+Table message {
+  id bigint [pk, not null, note: 'Message identifier']
+  freelancer_id bigint [not null, note: 'Sender/recipient if a freelancer']
+  hire_manager_id bigint [not null, note: 'Sender/recipient if a hiring manager']
+  message_time timestamp [note: 'Time the message was sent']
+  message_text text [note: 'Detailed content of the message']
+  proposal_id bigint [not null, note: 'Proposal context the two parties are discussing']
+  proposal_status_catalog_id bigint [not null]
+
+  Records {
+    1, 2, 1, '2026-02-13 10:00:00', 'Hi, I would like to discuss the dashboard requirements.', 1, 1
+    2, 2, 1, '2026-02-13 10:20:00', 'Sure, I have attached the wireframes.', 1, 1
+    3, 1, 1, '2026-02-14 09:00:00', 'Happy to start on the query optimization this week.', 2, 2
+    4, 3, 2, '2026-03-02 11:30:00', 'Here is my portfolio and a rough timeline for the redesign.', 3, 1
+  }
+
+  Note: 'Stores messages between freelancers and hiring managers.'
+}
+
+Table attachment {
+  id bigint [pk, not null, note: 'Attachment identifier']
+  message_id bigint [not null, note: 'Message that contains this attachment']
+  attachment_link text [note: 'Link (URL/S3) where the file is stored']
+
+  Records {
+    1, 2, 'https://files.example.com/wireframes_v1.pdf'
+    2, 4, 'https://files.example.com/portfolio_dang.pdf'
+    3, 4, 'https://files.example.com/redesign_timeline.xlsx'
+  }
+
+  Note: 'Stores attachment information for messages.'
+}
+
+Table freelancer_portfolio {
+  id bigint [pk, increment, not null, note: 'Unique identifier for each project/work item in the portfolio.']
+  freelancer_id bigint [not null, note: 'Identifies which freelancer owns this project.']
+  job_id bigint [note: 'Links to a job posting on the platform if done through the marketplace; NULL if it is an external self-made project.']
+  project_title varchar(255) [not null, note: 'Project title chosen by the freelancer to present to clients']
+  project_description text [note: 'Detailed description of the work, role, contribution or solution the freelancer delivered in the project']
+  project_url varchar(500) [note: 'URL to the live product, running website or demo source code on GitHub.']
+  completed_date date [note: 'Project completion date, used to display the experience timeline on the profile page']
+
+  Records {
+    1, 2, 1, 'React Analytics Dashboard', 'Built a responsive dashboard with charts, filters and CSV export.', 'https://demo.example.com/dashboard', '2026-03-20'
+    2, 1, null, 'Inventory API', 'Designed a REST API and MySQL schema for a small retail inventory system.', 'https://github.com/example/inventory-api', '2025-10-05'
+    3, 3, null, 'Fitness App UI Kit', 'Created a reusable mobile UI kit with 60+ components.', 'https://www.example.com/fitness-ui-kit', '2025-12-18'
+  }
+
+  Note: 'Stores projects in the freelancer portfolio.'
+}
+
+// User account relationships
+Ref: freelancer.user_account_id > user_account.id
+Ref: hire_manager.user_account_id > user_account.id
+
+// Freelancer tests and certifications
+Ref: test_result.freelancer_id > freelancer.id
+Ref: test_result.test_id > test.id
+Ref: certification.freelancer_id > freelancer.id
+
+// Freelancer skills (many-to-many)
+Ref: has_skill.freelancer_id > freelancer.id
+Ref: has_skill.skill_id > skill.id
+
+// Company and hiring managers
+Ref: hire_manager.company_id > company.id
+
+// Jobs
+Ref: job.hire_manager_id > hire_manager.id
+Ref: job.duration_id > expected_duration.id
+Ref: job.complexity_id > complexity.id
+Ref: job.main_skill_id > skill.id
+Ref: job.payment_type_id > payment_type.id
+
+// Job required skills (many-to-many)
+Ref: job_require_skill.job_id > job.id
+Ref: job_require_skill.skill_id > skill.id
+
+// Proposals
+Ref: proposal.job_id > job.id
+Ref: proposal.freelancer_id > freelancer.id
+Ref: proposal.payment_type_id > payment_type.id
+Ref: proposal.current_proposal_status_id > proposal_status_catalog.id
+
+// Contracts
+Ref: contract.proposal_id > proposal.id
+Ref: contract.company_id > company.id
+Ref: contract.freelancer_id > freelancer.id
+Ref: contract.payment_type_id > payment_type.id
+Ref: contract.current_contract_status_id > proposal_status_catalog.id
+
+// Work sessions
+Ref: work_session.contract_id > contract.id
+
+// Messages
+Ref: message.freelancer_id > freelancer.id
+Ref: message.hire_manager_id > hire_manager.id
+Ref: message.proposal_id > proposal.id
+Ref: message.proposal_status_catalog_id > proposal_status_catalog.id
+
+// Attachments
+Ref: attachment.message_id > message.id
+
+// Freelancer portfolio
+Ref: freelancer_portfolio.freelancer_id > freelancer.id
+Ref: freelancer_portfolio.job_id > job.id
